@@ -42,6 +42,8 @@ h2{font-size:clamp(34px,5vw,60px)}
 /* hero */
 .hero{padding:clamp(120px,16vh,170px) 0 0;text-align:center}
 .hero h1{font-size:clamp(30px,4.3vw,62px);max-width:17em;margin:0 auto;line-height:1.08;letter-spacing:-.035em}
+mark,.hero .hl > span{background:#F3E8CC;color:inherit;border-radius:.16em;padding:0 .16em}
+.hero .hl{white-space:nowrap}
 .hero p{font-size:clamp(17px,1.5vw,20px);color:var(--mut);max-width:34em;margin:26px auto 32px}
 .hero .meta{margin-top:18px;font-size:14px;color:var(--mut)}
 .hero .meta b{color:var(--ink);font-weight:500}
@@ -213,7 +215,7 @@ details[open] summary::after{transform:rotate(45deg)}
 <section class="hero">
   <div class="wrap">
     <span class="label" data-r>Florianópolis · 21 e 22 de novembro</span>
-    <h1 class="split">Faça harmonização facial como paciente modelo, com condições especiais e acompanhamento de profissionais com mais de 6 anos de experiência</h1>
+    <h1 class="split">Faça harmonização facial como <mark>paciente modelo</mark>, com condições especiais e acompanhamento de profissionais com mais de 6 anos de experiência</h1>
     <p data-r>Harmonize o seu rosto, faça aquele procedimento que você sempre sonhou e renove a sua beleza e a sua autoestima.</p>
     <div data-r>
       <a class="btn" data-wa href="#"><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg>Quero ser paciente modelo</a>
@@ -501,11 +503,17 @@ window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
 // ===== motion =====
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.querySelectorAll('.split').forEach(h => {
-  const words = h.textContent.trim().split(/\s+/); h.innerHTML = '';
-  words.forEach((w,i) => {
-    const ln = document.createElement('span'); ln.className = 'ln';
+  const words = [];
+  h.childNodes.forEach(n => {
+    if (n.nodeType === 3) n.textContent.split(/\s+/).forEach(t => { if (!t) return; /^[,.;:!?]/.test(t) && words.length ? (words[words.length-1].hl ? words[words.length-1].after = t : words[words.length-1].t += t) : words.push({t}); });
+    else words.push({t:n.textContent.trim(), hl:true});   // trecho destacado fica inteiro num bloco só
+  });
+  h.innerHTML = '';
+  words.forEach((o,i) => {
+    const w = o.t;
+    const ln = document.createElement('span'); ln.className = 'ln' + (o.hl ? ' hl' : '');
     const sp = document.createElement('span'); sp.textContent = w;
-    ln.appendChild(sp); h.appendChild(ln); if (i < words.length-1) h.appendChild(document.createTextNode(' '));
+    ln.appendChild(sp); h.appendChild(ln); if (o.after) h.appendChild(document.createTextNode(o.after)); if (i < words.length-1) h.appendChild(document.createTextNode(' '));
   });
 });
 
