@@ -287,6 +287,7 @@ details[open] summary::after{transform:rotate(45deg)}
         <span class="chip">Avaliação no dia</span>
         <span class="chip">Até 4x no cartão</span>
         <span class="chip">Retorno em 15 dias</span>
+        <span class="chip" id="chipVagas" style="border-color:var(--gold);color:var(--gold)">Só 25 vagas</span>
       </div>
     </div>
     <div style="position:relative">
@@ -305,8 +306,8 @@ details[open] summary::after{transform:rotate(45deg)}
 <!-- FAIXA -->
 <div class="strip" aria-hidden="true">
   <div class="track">
-    <span>Vagas limitadas para a turma de novembro</span><span>Florianópolis, 21 e 22 de novembro</span><span>Valores exclusivos da prática supervisionada</span><span>Avaliação do rosto antes de qualquer aplicação</span>
-    <span>Vagas limitadas para a turma de novembro</span><span>Florianópolis, 21 e 22 de novembro</span><span>Valores exclusivos da prática supervisionada</span><span>Avaliação do rosto antes de qualquer aplicação</span>
+    <span>Só 25 vagas para a turma de novembro</span><span>Florianópolis, 21 e 22 de novembro</span><span>Valores exclusivos da prática supervisionada</span><span>Avaliação do rosto antes de qualquer aplicação</span>
+    <span>Só 25 vagas para a turma de novembro</span><span>Florianópolis, 21 e 22 de novembro</span><span>Valores exclusivos da prática supervisionada</span><span>Avaliação do rosto antes de qualquer aplicação</span>
   </div>
 </div>
 
@@ -468,7 +469,7 @@ details[open] summary::after{transform:rotate(45deg)}
   <div class="wrap seats-box">
     <div>
       <span class="eyebrow" data-r>Turma de novembro</span>
-      <h2 class="split" style="margin-top:22px">As vagas são <span class="serif">poucas</span> por dia</h2>
+      <h2 class="split" style="margin-top:22px">São só <span class="serif">25 vagas</span> na turma</h2>
       <p class="lead" data-r style="margin-top:22px">Os horários são poucos porque a Dra. Mariane acompanha cada atendimento de perto. Quando os horários fecham, a próxima chance é só na turma seguinte.</p>
       <div class="count" data-r id="count"><div><b data-c="d">00</b><small>dias</small></div><div><b data-c="h">00</b><small>horas</small></div><div><b data-c="m">00</b><small>min</small></div><div><b data-c="s">00</b><small>seg</small></div></div>
     </div>
@@ -539,7 +540,9 @@ const CONFIG = {
   inicio: '2026-11-21T09:00:00-03:00',
   // Vagas por dia. Deixe null para mostrar só "Vagas limitadas".
   // Exemplo: [{total:8, restantes:3}, {total:8, restantes:5}]
-  vagas: null
+  vagas: null,
+  // Vagas da turma inteira (os dois dias somados). Atualize "restantes" conforme as reservas entram.
+  turma: {total: 25, restantes: 25}
 };
 const PRECOS = [
   {k:'Lábios', n:'Preenchimento labial', d:'Ácido hialurônico nos lábios', v:600, p:650},
@@ -611,6 +614,16 @@ if (Array.isArray(CONFIG.vagas)) {
   });
   ocupacao = tot ? (tot - rest) / tot : ocupacao;
   document.getElementById('seatTxt').textContent = `${tot - rest} de ${tot} vagas já reservadas para a turma.`;
+} else if (CONFIG.turma) {
+  const {total, restantes} = CONFIG.turma, res = total - restantes;
+  ocupacao = res / total;
+  document.querySelectorAll('[data-seat]').forEach(el => el.textContent = restantes <= 0 ? 'Esgotado' : 'Vagas abertas');
+  document.getElementById('seatTxt').textContent = restantes <= 0
+    ? 'As vagas desta turma acabaram. Chame no WhatsApp para entrar na lista da próxima.'
+    : (res > 0 ? `Restam ${restantes} de ${total} vagas na turma. Os horários são preenchidos por ordem de reserva.`
+               : `São só ${total} vagas para a turma inteira, nos dois dias. Os horários são preenchidos por ordem de reserva.`);
+  if (res <= 0) document.querySelector('.bar').style.display = 'none';
+  const chip = document.getElementById('chipVagas'); if (chip) chip.textContent = restantes > 0 ? `Só ${restantes} vagas` : 'Vagas esgotadas';
 }
 
 // botão flutuante e topo
