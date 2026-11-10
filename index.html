@@ -217,7 +217,7 @@ details[open] summary::after{transform:rotate(45deg)}
     <p data-r>Harmonize o seu rosto, faça aquele procedimento que você sempre sonhou e renove a sua beleza e a sua autoestima.</p>
     <div data-r>
       <a class="btn" data-wa href="#"><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg>Quero ser paciente modelo</a>
-      <div class="meta">A partir de <b>R$ 500</b> · <b id="heroVagas">25 vagas</b></div>
+      <div class="meta">A partir de <b>R$ 500</b> · <b id="heroVagas">restam 6 vagas</b></div>
     </div>
     <div class="face" id="face">
       <img src="img/hero.jpg" alt="Rosto com os pontos de avaliação da harmonização facial" width="1536" height="1024">
@@ -306,8 +306,8 @@ details[open] summary::after{transform:rotate(45deg)}
 
 <section class="sec seats">
   <div class="wrap">
-    <div class="big" id="bigN" data-r>25</div>
-    <h2 id="seatTitle" data-r>vagas na turma de novembro</h2>
+    <div class="big" id="bigN" data-r>19</div>
+    <h2 id="seatTitle" data-r>de 25 vagas já foram preenchidas. Garanta já a sua.</h2>
     <p class="mut" data-r>Sábado 21, das 9h às 19h · Domingo 22, das 9h às 18h</p>
     <div data-r>
       <div class="count"><div><b data-c="d">00</b><small>dias</small></div><div><b data-c="h">00</b><small>horas</small></div><div><b data-c="m">00</b><small>min</small></div><div><b data-c="s">00</b><small>seg</small></div></div>
@@ -366,7 +366,7 @@ const CONFIG = {
   mensagem: 'Oi! Vi a página e quero ser paciente modelo da mentoria de harmonização em Florianópolis (21 e 22/11).',
   inicio: '2026-11-21T09:00:00-03:00',
   // Vagas da turma inteira. Atualize "restantes" conforme as reservas entram.
-  turma: {total: 25, restantes: 25}
+  turma: {total: 25, restantes: 6}
 };
 const PRECOS = [
   {n:'Harmonização Full Face', d:'3 ml de preenchimento', v:1200, p:1300, top:true},
@@ -481,9 +481,10 @@ tick(); setInterval(tick, 1000);
 // vagas
 const {total, restantes} = CONFIG.turma;
 const bigN = document.getElementById('bigN');
-bigN.textContent = Math.max(0, restantes);
-document.getElementById('seatTitle').textContent = restantes <= 0 ? 'vagas. A turma de novembro esgotou.'
-  : (restantes < total ? `vagas restantes de ${total}` : 'vagas na turma de novembro');
+const preenchidas = Math.min(total, total - restantes);
+bigN.textContent = preenchidas;
+document.getElementById('seatTitle').textContent = restantes <= 0 ? `de ${total} vagas preenchidas. A turma de novembro esgotou.`
+  : `de ${total} vagas já foram preenchidas. Garanta já a sua.`;
 document.getElementById('heroVagas').textContent = restantes <= 0 ? 'vagas esgotadas' : (restantes < total ? `restam ${restantes} vagas` : `${total} vagas`);
 
 // topo e botão flutuante
@@ -557,7 +558,7 @@ if (!window.gsap || !window.ScrollTrigger || reduce) {
 
   // número grande de vagas conta até o valor
   ScrollTrigger.create({trigger:'.seats', start:'top 75%', onEnter:() => {
-    const to = Math.max(0, restantes), o = {n:0};
+    const to = preenchidas, o = {n:0};
     gsap.to(o, {n:to, duration:1.6, ease:'power3.out', onUpdate:() => bigN.textContent = Math.round(o.n)});
   }});
 
