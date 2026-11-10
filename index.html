@@ -9,6 +9,7 @@
 <meta property="og:description" content="Valor de paciente modelo, com a Dra. Mariane Botti ao lado. Florianópolis, 21 e 22/11.">
 <meta property="og:image" content="img/c06_d.jpg">
 <meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="img/logo-nos.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,7 +35,8 @@ h2{font-size:clamp(34px,5vw,60px)}
 .top{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .3s,border-color .3s;border-bottom:1px solid transparent}
 .top.scrolled{background:rgba(255,255,255,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
-.logo{font-weight:500;font-size:21px;letter-spacing:.28em}
+.logo img{height:34px;width:auto}
+.foot-logo{height:74px;width:auto;margin:0 auto 26px}
 .top .btn{padding:10px 18px;font-size:14px}
 
 /* hero */
@@ -130,7 +132,7 @@ details[open] summary::after{transform:rotate(45deg)}
 /* final */
 .final{text-align:center}
 .final h2{font-size:clamp(40px,7vw,96px);max-width:10em;margin:0 auto 34px}
-.foot{font-size:13px;color:var(--mut);padding:26px 0 100px;border-top:1px solid var(--line)}
+.foot{font-size:13px;color:var(--mut);padding:44px 0 100px;border-top:1px solid var(--line)}
 .foot .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 .fab{position:fixed;right:16px;bottom:16px;z-index:60;display:flex;align-items:center;gap:9px;background:var(--wa);color:#fff;border-radius:999px;padding:14px 20px 14px 16px;font-weight:500;font-size:15px;box-shadow:0 12px 30px -10px rgba(31,175,90,.6);transform:translateY(150%);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
@@ -178,7 +180,7 @@ details[open] summary::after{transform:rotate(45deg)}
 
 <header class="top" id="top">
   <div class="wrap">
-    <a class="logo" href="#">NÓS</a>
+    <a class="logo" href="#" aria-label="NÓS Núcleo de Odontologia e Saúde"><img src="img/logo-nos.png" alt="NÓS" width="112" height="51"></a>
     <a class="btn" data-wa href="#"><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg><span class="t">Quero uma vaga</span></a>
   </div>
 </header>
@@ -311,8 +313,9 @@ details[open] summary::after{transform:rotate(45deg)}
 </main>
 
 <footer class="foot">
+  <img class="foot-logo" src="img/logo-nos-completo.png" alt="NÓS Núcleo de Odontologia e Saúde">
   <div class="wrap">
-    <span>NÓS Odontologia e Saúde · Dra. Mariane Botti</span>
+    <span>NÓS Núcleo de Odontologia e Saúde · Dra. Mariane Botti</span>
     <span>Resultados variam de pessoa para pessoa.</span>
   </div>
 </footer>
