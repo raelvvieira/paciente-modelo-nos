@@ -77,7 +77,16 @@ h2{font-size:clamp(34px,5vw,60px)}
 .facts small{font-size:14px;color:var(--mut);display:block;margin-bottom:10px}
 .facts p{font-size:clamp(20px,2vw,26px);font-weight:500;letter-spacing:-.02em;line-height:1.2}
 
-.facts.f4{grid-template-columns:repeat(4,1fr);margin-top:40px}
+.proc{display:grid;grid-template-columns:auto 1fr;gap:clamp(30px,6vw,90px);align-items:center}
+.vid{position:relative;width:min(360px,34vw);aspect-ratio:9/16;border-radius:var(--r);overflow:hidden;background:var(--soft)}
+.vid video{width:100%;height:100%;object-fit:cover;display:block}
+#vidSom{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:500;padding:9px 14px;border-radius:999px;background:#fff;color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+#vidSom .on{display:none}
+#vidSom.ligado .on{display:block}
+#vidSom.ligado .off{display:none}
+.facts.f4{grid-template-columns:1fr;margin-top:34px;border-top:0}
+.facts.f4 div,.facts.f4 div + div{padding:18px 0;border-left:0;border-top:1px solid var(--line)}
+.facts.f4 small{margin-bottom:4px}
 .facts.f4 p{font-size:clamp(17px,1.5vw,20px)}
 .duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
 .duo > div{background:var(--soft);border-radius:var(--r);padding:26px 26px 28px}
@@ -162,6 +171,8 @@ details[open] summary::after{transform:rotate(45deg)}
   .trio::-webkit-scrollbar,.ba-track::-webkit-scrollbar{display:none}
   .trio figure{flex:0 0 78%;scroll-snap-align:center}
   .facts,.facts.f4{grid-template-columns:1fr;border-top:0}
+  .proc{grid-template-columns:1fr}
+  .vid{width:min(100%,340px);margin:0 auto}
   .duo{grid-template-columns:1fr}
   .facts div,.facts div + div{padding:22px 0;border-left:0;border-top:1px solid var(--line)}
   .dra,.faq{grid-template-columns:1fr}
@@ -217,7 +228,13 @@ details[open] summary::after{transform:rotate(45deg)}
 
 <section class="sec">
   <div class="wrap">
-    <span class="label" data-r>Como funciona</span>
+    <div class="proc">
+    <div class="vid" data-r>
+      <video id="procVid" src="video/processo.mp4" poster="video/processo.jpg" muted loop playsinline preload="metadata"></video>
+      <button id="vidSom" type="button" aria-label="Ativar o som do vídeo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path class="on" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="off" d="m16 9 5 6m0-6-5 6"/></svg><span>Ativar som</span></button>
+    </div>
+    <div>
+    <span class="label" data-r>Como é o processo</span>
     <h2 class="split">Aplicação Conferida</h2>
     <div class="facts f4">
       <div data-r><small>1 · Avaliação</small><p>A profissional olha o seu rosto e combina com você o que fazer.</p></div>
@@ -226,6 +243,8 @@ details[open] summary::after{transform:rotate(45deg)}
       <div data-r><small>4 · Retorno em 15 dias</small><p>Você volta para a Dra. ver o resultado.</p></div>
     </div>
     <p class="pr-note" data-r>Custa menos porque é uma prática de ensino, com valor de turma.</p>
+    </div>
+    </div>
   </div>
 </section>
 
@@ -439,6 +458,17 @@ function setMode(mode){
 tg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 window.addEventListener('load', movePill); window.addEventListener('resize', movePill); movePill();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(movePill);
+
+// vídeo do processo: toca sozinho (sem som) quando aparece na tela
+const pv = document.getElementById('procVid'), som = document.getElementById('vidSom');
+if ('IntersectionObserver' in window) new IntersectionObserver(es => es.forEach(e => { e.isIntersecting ? pv.play().catch(()=>{}) : pv.pause(); }), {threshold:.35}).observe(pv);
+else pv.autoplay = true;
+som.addEventListener('click', () => {
+  pv.muted = !pv.muted; som.classList.toggle('ligado', !pv.muted);
+  som.querySelector('span').textContent = pv.muted ? 'Ativar som' : 'Som ligado';
+  if (!pv.muted) { pv.currentTime = 0; pv.play().catch(()=>{}); }
+});
+pv.addEventListener('click', () => pv.paused ? pv.play() : pv.pause());
 
 // contagem regressiva
 const alvo = new Date(CONFIG.inicio).getTime();
