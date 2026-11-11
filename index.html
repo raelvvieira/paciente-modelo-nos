@@ -101,6 +101,20 @@ mark,.hero .hl > span{background:#F3E8CC;color:inherit;border-radius:.16em;paddi
 .ba-track{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none}
 .ba-track::-webkit-scrollbar{display:none}
 .ba-cta{text-align:center;margin-top:34px}
+.ba-track{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.ba-track.pegando{cursor:grabbing}
+.ba-track img{-webkit-user-drag:none;pointer-events:none}
+.ba-item{cursor:zoom-in}
+.ba-track.pegando .ba-item{cursor:grabbing}
+#lb{position:fixed;inset:0;z-index:100;background:rgba(12,12,12,.93);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;cursor:zoom-out}
+#lb.on{opacity:1;visibility:visible}
+#lb .lb-box{width:min(94vw,calc(86vh*1.5));background:transparent;gap:6px;transform:scale(.96);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+#lb.on .lb-box{transform:none}
+#lb .lb-box.solo{width:min(94vw,calc(86vh*.75))}
+#lb .lb-x{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;border:0;background:#fff;color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+@media (max-width:860px) and (orientation:portrait){
+  #lb .lb-box:not(.solo){grid-template-columns:1fr;width:min(94vw,calc(43vh*.75))}
+}
 .ba-item{flex:0 0 auto;width:min(66vh,78vw);aspect-ratio:1/1;border-radius:var(--r);overflow:hidden;background:var(--soft)}
 .ba-item.tall{aspect-ratio:9/16;width:min(38vh,50vw)}
 .ba-item img{width:100%;height:100%;object-fit:cover}
@@ -369,6 +383,8 @@ src="https://www.facebook.com/tr?id=729537770186252&ev=PageView&noscript=1"
   </div>
 </footer>
 
+<div id="lb" role="dialog" aria-label="Caso ampliado"><button class="lb-x" type="button" aria-label="Fechar">×</button><div class="lb-box pair"></div></div>
+
 <a class="fab" data-wa href="#" aria-label="Falar no WhatsApp"><svg viewBox="0 0 24 24"><use href="#i-wa"/></svg><span class="t">Garantir vaga</span></a>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -429,23 +445,47 @@ PONTOS.forEach((p,i) => {
 const baTrack = document.getElementById('baTrack');
 const baHTML = CASOS.map(c => `<figure class="ba-item pair${c.d && !c.a ? ' solo' : ''}">${pairHTML(c)}</figure>`).join('');
 baTrack.innerHTML = baHTML + baHTML;   // duas cópias para o giro não ter fim
-(function autoRoll(){
+(function carrossel(){
   const VEL = 28;                       // pixels por segundo
-  let pos = 0, last = performance.now(), pausa = 0, segura = false;
+  let pos = 0, last = performance.now(), pausaAte = 0, tocando = false, arrasto = null, moveu = false;
   const meio = () => baTrack.scrollWidth / 2 + 7;
-  const parar = () => { segura = true; };
-  const soltar = () => { segura = false; pausa = performance.now() + 1800; pos = baTrack.scrollLeft; };
-  baTrack.addEventListener('pointerdown', parar); baTrack.addEventListener('touchstart', parar, {passive:true});
-  ['pointerup','pointerleave','touchend','touchcancel'].forEach(e => baTrack.addEventListener(e, soltar, {passive:true}));
-  baTrack.addEventListener('wheel', e => { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) { pausa = performance.now() + 1800; requestAnimationFrame(() => pos = baTrack.scrollLeft); } }, {passive:true});
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const agora = () => performance.now();
+
+  // dedo: o navegador rola sozinho; só paramos o giro enquanto a pessoa mexe
+  baTrack.addEventListener('touchstart', () => { tocando = true; }, {passive:true});
+  ['touchend','touchcancel'].forEach(e => baTrack.addEventListener(e, () => { tocando = false; pausaAte = agora() + 2500; }, {passive:true}));
+  // qualquer rolagem que não veio do giro (dedo, inércia, trackpad) adia a volta do automático
+  baTrack.addEventListener('scroll', () => { if (Math.abs(baTrack.scrollLeft - pos) > 3) { pos = baTrack.scrollLeft; pausaAte = Math.max(pausaAte, agora() + 1800); } }, {passive:true});
+
+  // mouse: arrastar para os lados
+  baTrack.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button) return; arrasto = {x:e.clientX, s:baTrack.scrollLeft}; moveu = false; });
+  window.addEventListener('pointermove', e => { if (!arrasto) return; const dx = e.clientX - arrasto.x; if (Math.abs(dx) > 5) { moveu = true; baTrack.classList.add('pegando'); } if (moveu) { let v = arrasto.s - dx; const m = meio(); if (v < 0) { v += m; arrasto.s += m; } else if (v >= m) { v -= m; arrasto.s -= m; } baTrack.scrollLeft = pos = v; } });
+  window.addEventListener('pointerup', () => { if (!arrasto) return; arrasto = null; baTrack.classList.remove('pegando'); pausaAte = agora() + 1800; });
+
+  // clique ou toque (sem arrastar) amplia o caso
+  const lb = document.getElementById('lb'), lbBox = lb.querySelector('.lb-box');
+  function abrir(fig){
+    lbBox.className = 'lb-box pair' + (fig.classList.contains('solo') ? ' solo' : '');
+    lbBox.innerHTML = fig.innerHTML;
+    lb.classList.add('on'); document.documentElement.style.overflow = 'hidden';
+    if (window.__lenis) window.__lenis.stop();
+  }
+  function fechar(){ lb.classList.remove('on'); document.documentElement.style.overflow = ''; if (window.__lenis) window.__lenis.start(); pausaAte = agora() + 1200; }
+  baTrack.addEventListener('click', e => { if (moveu) { moveu = false; return; } const fig = e.target.closest('.ba-item'); if (fig) abrir(fig); });
+  lb.addEventListener('click', fechar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && lb.classList.contains('on')) fechar(); });
+
+  const parado = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function passo(t){
     const dt = Math.min(64, t - last); last = t;
-    if (!segura && t > pausa) {
+    const m = meio(), livre = !tocando && !arrasto && !lb.classList.contains('on');
+    if (livre && baTrack.scrollLeft >= m) { baTrack.scrollLeft -= m; pos = baTrack.scrollLeft; }
+    if (livre && !parado && t > pausaAte) {
+      if (Math.abs(baTrack.scrollLeft - pos) > 3) pos = baTrack.scrollLeft;   // retoma de onde a pessoa deixou
       pos += VEL * dt / 1000;
-      if (pos >= meio()) pos -= meio();
+      if (pos >= m) pos -= m;
       baTrack.scrollLeft = pos;
-    } else if (baTrack.scrollLeft >= meio()) { baTrack.scrollLeft -= meio(); }
+    }
     requestAnimationFrame(passo);
   }
   requestAnimationFrame(passo);
@@ -542,7 +582,7 @@ if (!window.gsap || !window.ScrollTrigger || reduce) {
 } else {
   gsap.registerPlugin(ScrollTrigger);
   if (window.Lenis && !matchMedia('(pointer:coarse)').matches) {
-    const lenis = new Lenis({duration:1.1});
+    const lenis = new Lenis({duration:1.1}); window.__lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(t => lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0);
   }
