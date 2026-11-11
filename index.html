@@ -204,6 +204,23 @@ details[open] summary::after{transform:rotate(45deg)}
 }
 </style>
 <script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.__motionOk)document.documentElement.classList.remove('js')},3500)</script>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '729537770186252');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=729537770186252&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
 </head>
 <body>
 
@@ -436,6 +453,10 @@ baTrack.innerHTML = baHTML + baHTML;   // duas cópias para o giro não ter fim
 
 const waUrl = 'https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(CONFIG.mensagem);
 document.querySelectorAll('[data-wa]').forEach(a => { a.href = waUrl; a.target = '_blank'; a.rel = 'noopener'; });
+document.addEventListener('click', e => {
+  if (!e.target.closest('[data-wa]')) return;
+  if (typeof fbq === 'function') fbq('track', 'Lead', {content_name: 'WhatsApp Paciente Modelo'});
+});
 
 // tabela
 document.getElementById('rows').innerHTML = PRECOS.map(x => `
